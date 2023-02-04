@@ -1,4 +1,1364 @@
-<script src="gn-js-client.min.js"></script>
-<script src="./plugins/socket.io.min.js"></script>
-<script src="./plugins/msgpack.min.js"></script>
-<script src="./plugins/axios.min.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <script src="./gn-js-client.min.js"></script>
+  <title>GN SERVER</title>
+</head>
+
+<body>
+  <div class="container">
+    <h4 class="mb-5">[GN SERVER] Testcode</h4>
+
+    <div id="panelSocketDisconnected" class="mb-3">
+      <button class="btn btn-success" style="width: 256px !important;" onclick="gnConnectSocket()">Connect
+        Socket</button>
+    </div>
+
+    <div id="panelSocketConnected" class="mb-3">
+      <div class="row">
+        <div class="col-12 col-md-3">
+          <button class="btn btn-dark" style="width: 256px !important;" onclick="gnDisconnectSocket()">Disconnect
+            Socket</button>
+        </div>
+        <div class="col-12 col-md-3">
+          <input class="input-height form-control" style="height: 40px;" type="text" placeholder="SocketId"
+            value="SocketId: " id="socketIdField" disabled />
+        </div>
+      </div>
+    </div>
+
+    <div class="input-form d-flex flex-column mt-3">
+      <div class="row mb-2">
+        <div class="col-12 col-md-12">
+          <select class="form-select" style="height: 40px;" id="operationCodeDropdown"
+            onchange="onOperationCodeDropdownValueChange()">
+            <option value="-1" selected>Logout -1</option>
+            <option value="1">GetConfig 1</option>
+            <option value="2">Login 2</option>
+            <option value="3">EnterDisplayName 3</option>
+          </select>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-12 col-md-6">
+          <input class="input-height form-control" style="height: 40px;" type="text" placeholder="AuthToken"
+            id="authTokenField" />
+        </div>
+        <div class="col-12 col-md-6">
+          <input class="input-height form-control" style="height: 40px;" type="number" placeholder="RequestId"
+            id="requestIdField" />
+        </div>
+      </div>
+      <div class="d-flex align-items-center checkbox-container mb-4">
+        <input type="checkbox" name="isEncrypted" style="height: 26px; width: 26px;" id="isEncryptedToggle" />
+        <label style="margin-left: 8px;" for="isEncryptedToggle">Is Encrypted</label>
+      </div>
+
+      <div id="panelParameters">
+        <h5>Parameters</h5>
+
+        <!-- Row 0 -->
+        <div class="mb-3" id="row0">
+          <div class="row">
+            <div class="col-12 col-md-3">
+              <select class="select-container form-select" id="parameterCodeRow0Dropdown" disabled>
+                <option value="1" selected>LoginParameterCode.Username</option>
+                <option value="2">LoginParameterCode.Password</option>
+                <option value="3">Anonymous</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2">
+              <select class="select-container form-select" id="typeRow0Dropdown" disabled>
+                <option value="0" selected>String</option>
+                <option value="1">Number</option>
+                <option value="2">Boolean</option>
+                <option value="3">GNHashtable</option>
+                <option value="4">GNArray</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-7">
+              <div id="panelRow0">
+                <input class="input-height form-control" type="text" placeholder="Value as string"
+                  id="valueRow0Field" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 1 -->
+        <div class="mb-3" id="row1">
+          <div class="row">
+            <div class="col-12 col-md-3">
+              <select class="select-container form-select" id="parameterCodeRow1Dropdown" disabled>
+                <option value="1" selected>LoginParameterCode.Username</option>
+                <option value="2">LoginParameterCode.Password</option>
+                <option value="3">Anonymous</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2">
+              <select class="select-container form-select" id="typeRow1Dropdown" disabled>
+                <option value="0">String</option>
+                <option value="1" selected>Number</option>
+                <option value="2">Boolean</option>
+                <option value="3">GNHashtable</option>
+                <option value="4">GNArray</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-7">
+              <div id="panelRow1">
+                <input class="input-height form-control" type="number" placeholder="Value as number"
+                  id="valueRow1Field" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="mb-3" id="row2">
+          <div class="row">
+            <div class="col-12 col-md-3">
+              <select class="select-container form-select" id="parameterCodeRow2Dropdown" disabled>
+                <option value="1" selected>LoginParameterCode.Username</option>
+                <option value="2">LoginParameterCode.Password</option>
+                <option value="3">Anonymous</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2">
+              <select class="select-container form-select" id="typeRow2Dropdown" disabled>
+                <option value="0">String</option>
+                <option value="1">Number</option>
+                <option value="2" selected>Boolean</option>
+                <option value="3">GNHashtable</option>
+                <option value="4">GNArray</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-7">
+              <div id="panelRow2">
+                <input style="margin-top: 6px; height: 26px; width: 26px;" type="checkbox" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="mb-3" id="row3">
+          <div class="row">
+            <div class="col-12 col-md-3">
+              <select class="select-container form-select" id="parameterCodeRow3Dropdown" disabled>
+                <option value="1">LoginParameterCode.Username</option>
+                <option value="2">LoginParameterCode.Password</option>
+                <option value="3">Anonymous</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2">
+              <select class="select-container form-select" id="typeRow3Dropdown" disabled>
+                <option value="0">String</option>
+                <option value="1">Number</option>
+                <option value="2">Boolean</option>
+                <option value="3" selected>GNHashtable</option>
+                <option value="4">GNArray</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-7">
+              <div id="panelRow3a">
+                <button class="btn btn-outline-success mt-1 btn-sm" id="addKeyPairValueRow3Btn"
+                  onclick="addKeyPairValue('row3')">+
+                  Key Pair Value</button>
+              </div>
+            </div>
+            <div id="panelRow3b">
+              <div class="col-12 mb-1" style="display: flex;">
+                <div style="padding-left: 40px; flex: 1;">
+                  <!-- Row 3.0 -->
+                  <div class="mt-1" id="row3.0">
+                    <div class="row">
+                      <div class="col-12 col-md-3">
+                        <input class="input-height form-control" style="height: 40px;" type="text"
+                          placeholder="ParameterCode" id="parameterCodeRow3.0Field" />
+                      </div>
+                      <div class="col-12 col-md-2">
+                        <select class="select-container form-select" id="typeRow3.0Dropdown"
+                          onchange="onTypeDropdownChange('3.0')">
+                          <option value="0" selected>String</option>
+                          <option value="1">Number</option>
+                          <option value="2">Boolean</option>
+                          <option value="3">GNHashtable</option>
+                          <option value="4">GNArray</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <div id="panelRow3.0a">
+                          <input class="input-height form-control" type="text" placeholder="Value as string" />
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-1">
+                        <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                          id="addKeyPairValueRow3Btn" onclick="addKeyPairValue('')">-</button>
+                      </div>
+                      <div id="panelRow3.0b">
+
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Row 3.1 -->
+                  <div class="mt-1" id="row3.1">
+                    <div class="row">
+                      <div class="col-12 col-md-3">
+                        <input class="input-height form-control" style="height: 40px;" type="text"
+                          placeholder="ParameterCode" id="parameterCodeRow3.1Field" />
+                      </div>
+                      <div class="col-12 col-md-2">
+                        <select class="select-container form-select" id="typeRow3.1Dropdown">
+                          <option value="0">String</option>
+                          <option value="1" selected>Number</option>
+                          <option value="2">Boolean</option>
+                          <option value="3">GNHashtable</option>
+                          <option value="4">GNArray</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <div id="panelRow3.1">
+                          <input class="input-height form-control" type="number" placeholder="Value as number" />
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-1">
+                        <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                          id="addKeyPairValueRow3.1Btn" onclick="addKeyPairValue('')">-</button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Row 3.2 -->
+                  <div class="mt-1" id="row3.2">
+                    <div class="row">
+                      <div class="col-12 col-md-3">
+                        <input class="input-height form-control" style="height: 40px;" type="text"
+                          placeholder="ParameterCode" id="parameterCodeRow3.2Field" />
+                      </div>
+                      <div class="col-12 col-md-2">
+                        <select class="select-container form-select" id="typeRow3.2Dropdown">
+                          <option value="1">String</option>
+                          <option value="2">Number</option>
+                          <option value="3" selected>Boolean</option>
+                          <option value="3">GNHashtable</option>
+                          <option value="3">GNArray</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <div id="panelRow3.2">
+                          <div class="d-flex align-items-center checkbox-container">
+                            <input style="margin-top: 6px; height: 26px; width: 26px;" type="checkbox" />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-1">
+                        <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                          id="addKeyPairValueRow3.2Btn" onclick="addKeyPairValue('')">-</button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Row 3.3 -->
+                  <div class="mt-1" id="row3.3">
+                    <div class="row">
+                      <div class="col-12 col-md-3">
+                        <input class="input-height form-control" style="height: 40px;" type="text"
+                          placeholder="ParameterCode" id="parameterCodeRow3.3Field" />
+                      </div>
+                      <div class="col-12 col-md-2">
+                        <select class="select-container form-select" id="typeRow3.3Dropdown">
+                          <option value="0">String</option>
+                          <option value="1">Number</option>
+                          <option value="2">Boolean</option>
+                          <option value="3" selected>GNHashtable</option>
+                          <option value="4">GNArray</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <button class="btn btn-outline-success mt-1 btn-sm" id="addKeyPairValueRow3.3Btn"
+                          onclick="addKeyPairValue('')">+
+                          Key Pair Value</button>
+                      </div>
+                      <div class="col-12 col-md-1">
+                        <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                          id="addKeyPairValueRow3.2Btn" onclick="addKeyPairValue('')">-</button>
+                      </div>
+
+                      <div id="panelRow3.3">
+                        <div class="col-12 mb-1" style="display: flex;">
+                          <div style="padding-left: 40px; flex: 1">
+                            <!-- Row 3.3.0 -->
+                            <div class="mt-1" id="row3.3.0">
+                              <div class="row">
+                                <div class="col-12 col-md-3">
+                                  <input class="input-height form-control" style="height: 40px;" type="text"
+                                    placeholder="ParameterCode" id="parameterCodeRow3.3.0Field" />
+                                </div>
+                                <div class="col-12 col-md-2">
+                                  <select class="select-container form-select" id="typeRow3.3.0Dropdown">
+                                    <option value="0" selected>String</option>
+                                    <option value="1">Number</option>
+                                    <option value="2">Boolean</option>
+                                    <option value="3">GNHashtable</option>
+                                    <option value="4">GNArray</option>
+                                  </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                  <div id="panelRow3.3.0">
+                                    <input class="input-height form-control" type="text"
+                                      placeholder="Value as string" />
+                                  </div>
+                                </div>
+                                <div class="col-12 col-md-1">
+                                  <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                                    id="addKeyPairValueRow3.3.0Btn" onclick="addKeyPairValue('')">-</button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Row 3.3.1 -->
+                            <div class="mt-1" id="row3.3.1">
+                              <div class="row">
+                                <div class="col-12 col-md-3">
+                                  <input class="input-height form-control" style="height: 40px;" type="text"
+                                    placeholder="ParameterCode" id="parameterCodeRow3.1Field" />
+                                </div>
+                                <div class="col-12 col-md-2">
+                                  <select class="select-container form-select" id="typeRow3.1Dropdown">
+                                    <option value="0">String</option>
+                                    <option value="1" selected>Number</option>
+                                    <option value="2">Boolean</option>
+                                    <option value="3">GNHashtable</option>
+                                    <option value="4">GNArray</option>
+                                  </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                  <div id="panelRow3.1">
+                                    <input class="input-height form-control" type="number"
+                                      placeholder="Value as number" />
+                                  </div>
+                                </div>
+                                <div class="col-12 col-md-1">
+                                  <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                                    id="addKeyPairValueRow3.1Btn" onclick="addKeyPairValue('')">-</button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Row 3.3.2 -->
+                            <div class="mt-1" id="row3.3.2">
+                              <div class="row">
+                                <div class="col-12 col-md-3">
+                                  <input class="input-height form-control" style="height: 40px;" type="text"
+                                    placeholder="ParameterCode" id="parameterCodeRow3.3.2Field" />
+                                </div>
+                                <div class="col-12 col-md-2">
+                                  <select class="select-container form-select" id="typeRow3.3.2Dropdown">
+                                    <option value="1">String</option>
+                                    <option value="2">Number</option>
+                                    <option value="3" selected>Boolean</option>
+                                    <option value="3">GNHashtable</option>
+                                    <option value="3">GNArray</option>
+                                  </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                  <div id="panelRow3.3.2">
+                                    <div class="d-flex align-items-center checkbox-container">
+                                      <input style="margin-top: 6px; height: 26px; width: 26px;" type="checkbox" />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-12 col-md-1">
+                                  <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                                    id="addKeyPairValueRow3.2Btn" onclick="addKeyPairValue('')">-</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="mt-3" id="row4">
+          <div class="row">
+            <div class="col-12 col-md-3">
+              <select class="select-container form-select">
+                <option value="1">LoginParameterCode.Username</option>
+                <option value="2">LoginParameterCode.Password</option>
+                <option value="3">Anonymous</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2">
+              <select class="select-container form-select">
+                <option value="1">String</option>
+                <option value="2">Number</option>
+                <option value="3">Boolean</option>
+                <option value="3">GNHashtable</option>
+                <option value="3" selected>GNArray</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-7">
+              <button class="btn btn-outline-success mt-1 btn-sm" id="addKeyPairValueRow4Btn"
+                onclick="addKeyPairValue('')">+
+                Value</button>
+            </div>
+            <div id="panelRow4">
+
+
+              <div class="col-12 mb-1" style="display: flex;">
+                <div style="padding-left: 40px; flex: 1">
+                  <!-- Row 4.0 -->
+                  <div class="mt-1" id="row3.0">
+
+                    <div class="row">
+                      <div class="col-12 col-md-1" style="padding-right: 0;">
+                        <span style="line-height: 40px;">0.</span>
+                      </div>
+                      <div class="col-12 col-md-2">
+                      </div>
+                      <div class="col-12 col-md-2">
+                        <select class="select-container form-select" id="typeRow3.0Dropdown">
+                          <option value="0" selected>String</option>
+                          <option value="1">Number</option>
+                          <option value="2">Boolean</option>
+                          <option value="3">GNHashtable</option>
+                          <option value="4">GNArray</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <div id="panelRow4.0">
+                          <input class="input-height form-control" type="text" placeholder="Value as string" />
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-1">
+                        <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                          id="addKeyPairValueRow3Btn" onclick="addKeyPairValue('')">-</button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Row 4.1 -->
+                  <div class="mt-1" id="row4.1">
+                    <div class="row">
+                      <div class="col-12 col-md-1" style="padding-right: 0;">
+                        <span style="line-height: 40px;">1.</span>
+                      </div>
+                      <div class="col-12 col-md-2">
+                      </div>
+                      <div class="col-12 col-md-2">
+                        <select class="select-container form-select" id="typeRow4.1Dropdown">
+                          <option value="0">String</option>
+                          <option value="1" selected>Number</option>
+                          <option value="2">Boolean</option>
+                          <option value="3">GNHashtable</option>
+                          <option value="4">GNArray</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <div id="panelRow4.1">
+                          <input class="input-height form-control" type="number" placeholder="Value as number" />
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-1">
+                        <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                          id="addKeyPairValueRow4.1Btn" onclick="addKeyPairValue('')">-</button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Row 4.2 -->
+                  <div class="mt-1" id="row3.2">
+                    <div class="row">
+                      <div class="col-12 col-md-1" style="padding-right: 0;">
+                        <span style="line-height: 40px;">2.</span>
+                      </div>
+                      <div class="col-12 col-md-2">
+                      </div>
+                      <div class="col-12 col-md-2">
+                        <select class="select-container form-select" id="typeRow3.2Dropdown">
+                          <option value="1">String</option>
+                          <option value="2">Number</option>
+                          <option value="3" selected>Boolean</option>
+                          <option value="3">GNHashtable</option>
+                          <option value="3">GNArray</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <div id="panelRow4.2">
+                          <div class="d-flex align-items-center checkbox-container">
+                            <input style="margin-top: 6px; height: 26px; width: 26px;" type="checkbox" />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-1">
+                        <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                          id="addKeyPairValueRow4.2Btn" onclick="addKeyPairValue('')">-</button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Row 4.3 -->
+                  <div class="mt-1" id="row4.3">
+                    <div class="row">
+                      <div class="col-12 col-md-1" style="padding-right: 0;">
+                        <span style="line-height: 40px;">3.</span>
+                      </div>
+                      <div class="col-12 col-md-2">
+                      </div>
+                      <div class="col-12 col-md-2">
+                        <select class="select-container form-select" id="typeRow3.3Dropdown">
+                          <option value="0">String</option>
+                          <option value="1">Number</option>
+                          <option value="2">Boolean</option>
+                          <option value="3" selected>GNHashtable</option>
+                          <option value="4">GNArray</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <button class="btn btn-outline-success mt-1 btn-sm" id="addKeyPairValueRow3.3Btn"
+                          onclick="addKeyPairValue('')">+
+                          Key Pair Value</button>
+                      </div>
+                      <div class="col-12 col-md-1">
+                        <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                          id="addKeyPairValueRow4.3Btn" onclick="addKeyPairValue('')">-</button>
+                      </div>
+
+                      <div id="panelRow4.3">
+                        <div class="col-12 mb-1" style="display: flex;">
+                          <div style="padding-left: 40px; flex: 1;">
+                            <!-- Row 4.3.0 -->
+                            <div class="mt-1" id="row3.3.0">
+                              <div class="row">
+                                <div class="col-12 col-md-3">
+                                  <input class="input-height form-control" style="height: 40px;" type="text"
+                                    placeholder="ParameterCode" id="parameterCodeRow4.3.0Field" />
+                                </div>
+                                <div class="col-12 col-md-2">
+                                  <select class="select-container form-select" id="typeRow4.3.0Dropdown">
+                                    <option value="0" selected>String</option>
+                                    <option value="1">Number</option>
+                                    <option value="2">Boolean</option>
+                                    <option value="3">GNHashtable</option>
+                                    <option value="4">GNArray</option>
+                                  </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                  <div id="panelRow4.3.0">
+                                    <input class="input-height form-control" type="text"
+                                      placeholder="Value as string" />
+                                  </div>
+                                </div>
+                                <div class="col-12 col-md-1">
+                                  <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                                    id="addKeyPairValueRow4.3.0Btn" onclick="addKeyPairValue('')">-</button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Row 4.3.1 -->
+                            <div class="mt-1" id="row4.3.1">
+                              <div class="row">
+                                <div class="col-12 col-md-3">
+                                  <input class="input-height form-control" style="height: 40px;" type="text"
+                                    placeholder="ParameterCode" id="parameterCodeRow4.3.1Field" />
+                                </div>
+                                <div class="col-12 col-md-2">
+                                  <select class="select-container form-select" id="typeRow3.1Dropdown">
+                                    <option value="0">String</option>
+                                    <option value="1" selected>Number</option>
+                                    <option value="2">Boolean</option>
+                                    <option value="3">GNHashtable</option>
+                                    <option value="4">GNArray</option>
+                                  </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                  <div id="panelRow4.1">
+                                    <input class="input-height form-control" type="number"
+                                      placeholder="Value as number" />
+                                  </div>
+                                </div>
+                                <div class="col-12 col-md-1">
+                                  <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                                    id="addKeyPairValueRow3.1Btn" onclick="addKeyPairValue('')">-</button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Row 3.3.2 -->
+                            <div class="mt-1" id="row3.3.2">
+                              <div class="row">
+                                <div class="col-12 col-md-3">
+                                  <input class="input-height form-control" style="height: 40px" type="text"
+                                    placeholder="ParameterCode" id="parameterCodeRow3.3.2Field" />
+                                </div>
+                                <div class="col-12 col-md-2">
+                                  <select class="select-container form-select" id="typeRow3.3.2Dropdown">
+                                    <option value="1">String</option>
+                                    <option value="2">Number</option>
+                                    <option value="3" selected>Boolean</option>
+                                    <option value="3">GNHashtable</option>
+                                    <option value="3">GNArray</option>
+                                  </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                  <div id="panelRow3.3.2">
+                                    <div class="d-flex align-items-center checkbox-container">
+                                      <input style="margin-top: 6px; height: 26px; width: 26px;" type="checkbox" />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-12 col-md-1">
+                                  <button style="margin-top: 3px; width: 50px;" class="btn btn-outline-secondary btn-sm"
+                                    id="addKeyPairValueRow3.2Btn" onclick="addKeyPairValue('')">-</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-5 mb-5">
+      <button class="btn btn-primary">Send Via Http</button>
+      <button class="btn btn-primary">Send Via Socket</button>
+    </div>
+
+    <div class="mt-5 mb-5">
+      <h5>OperationResponse</h5>
+      <div id="panelOperationResponse">
+        <div class="row">
+          <div class="col-12 col-md-4">
+            <label class="form-control">Login</label>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-control">ReturnCode.Ok</label>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-control">Ok</label>
+          </div>
+          <div>
+            <div class="col-12 mb-1" style="display: flex;">
+              <div style="padding-left: 40px; flex: 1;">
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">0 string</label>
+                    </div>
+                    <div class="col-12 col-md-10">
+                      <input class="input-height form-control" type="text" value="number is here" disabled />
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">-1 null</label>
+                    </div>
+                    <div class="col-12 col-md-10">
+                      <span style="line-height: 40px;">null</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">1 number</label>
+                    </div>
+                    <div class="col-12 col-md-10">
+                      <input class="input-height form-control" type="number" value="5" disabled />
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">2 boolean</label>
+                    </div>
+                    <div class="col-12 col-md-10">
+                      <input style="margin-top: 6px; height: 26px; width: 26px;" type="checkbox" checked disabled>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">3 gnHashtable</label>
+                    </div>
+                    <div class="col-12 mb-1" style="display: flex;">
+                      <div style="padding-left: 40px; flex: 1;">
+                        <div class="mt-1">
+                          <div class="row">
+                            <div class="col-12 col-md-2">
+                              <label class="form-control">0 string</label>
+                            </div>
+                            <div class="col-12 col-md-10">
+                              <input class="input-height form-control" type="text" value="number is here" disabled />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">4 gnArray</label>
+                    </div>
+                    <div class="col-12 mb-1" style="display: flex;">
+                      <div style="padding-left: 40px; flex: 1;">
+                        <div class="mt-1">
+                          <div class="row">
+                            <div class="col-12 col-md-2">
+                              <span style="line-height: 40px;">0.</span>
+                            </div>
+                            <div class="col-12 col-md-10">
+                              <input class="input-height form-control" type="text" value="number is here" disabled />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h5 class="mt-2">OperationEvent</h5>
+      <div id="panelOperationEvent">
+        <div class="row">
+          <div class="col-12 col-md-4">
+            <label class="form-control">OnDebug</label>
+          </div>
+          <div id="panelRow0">
+            <div class="col-12 mb-1" style="display: flex;">
+              <div style="padding-left: 40px; flex: 1;">
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">0 string</label>
+                    </div>
+                    <div class="col-12 col-md-10">
+                      <input class="input-height form-control" type="text" value="number is here" disabled />
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">-1 null</label>
+                    </div>
+                    <div class="col-12 col-md-10">
+                      <span style="line-height: 40px;">null</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">1 number</label>
+                    </div>
+                    <div class="col-12 col-md-10">
+                      <input class="input-height form-control" type="number" value="5" disabled />
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">2 boolean</label>
+                    </div>
+                    <div class="col-12 col-md-10">
+                      <input style="margin-top: 6px; height: 26px; width: 26px;" type="checkbox" checked disabled>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">3 gnHashtable</label>
+                    </div>
+                    <div class="col-12 mb-1" style="display: flex;">
+                      <div style="padding-left: 40px; flex: 1;">
+                        <div class="mt-1">
+                          <div class="row">
+                            <div class="col-12 col-md-2">
+                              <label class="form-control">0 string</label>
+                            </div>
+                            <div class="col-12 col-md-10">
+                              <input class="input-height form-control" type="text" value="number is here" disabled />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <div class="row">
+                    <div class="col-12 col-md-2">
+                      <label class="form-control">4 gnArray</label>
+                    </div>
+                    <div class="col-12 mb-1" style="display: flex;">
+                      <div style="padding-left: 40px; flex: 1;">
+                        <div class="mt-1">
+                          <div class="row">
+                            <div class="col-12 col-md-2">
+                              <span style="line-height: 40px;">0.</span>
+                            </div>
+                            <div class="col-12 col-md-10">
+                              <input class="input-height form-control" type="text" value="number is here" disabled />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    initGNServer();
+
+    function gnConnectSocket() {
+      GN.GNNetwork.connectSocket(() => {
+        console.log("connect success");
+      });
+    }
+
+    function gnDisconnectSocket() {
+      GN.GNNetwork.disconnectSocket(() => {
+        console.log("disconnect success");
+      });
+    }
+
+    function onOperationCodeDropdownValueChange(event) {
+      let operationCode = document.getElementById("operationCodeDropdown").value;
+      console.log("operationCodeDropdown " + operationCode);
+
+      let panelParameters = document.getElementById("panelParameters");
+      panelParameters.remove();
+
+
+    }
+
+    function onTypeDropdownChange(rowId) {
+      let value = document.getElementById("typeRow" + rowId + "Dropdown").value;
+
+      if (value == "0") {
+        let panelRow = document.getElementById("panelRow" + rowId + "a");
+        panelRow.innerHTML = "";
+
+        let inputField = document.createElement("input");
+        inputField.classList.add("input-height");
+        inputField.classList.add("form-control");
+        inputField.type = "text";
+        inputField.placeholder = "Value as string";
+        inputField.id = "valueRow" + rowId + "Field";
+
+        panelRow.appendChild(inputField);
+      }
+      else if (value == "1") {
+        let panelRow = document.getElementById("panelRow" + rowId + "a");
+        panelRow.innerHTML = "";
+
+        let inputField = document.createElement("input");
+        inputField.classList.add("input-height");
+        inputField.classList.add("form-control");
+        inputField.type = "number";
+        inputField.placeholder = "Value as number";
+        inputField.id = "valueRow" + rowId + "Field";
+
+        panelRow.appendChild(inputField);
+      }
+      else if (value == "2") {
+        let panelRow = document.getElementById("panelRow" + rowId + "a");
+        panelRow.innerHTML = "";
+
+        let inputField = document.createElement("input");
+        inputField.type = "checkbox";
+        inputField.placeholder = "Value as boolean";
+        inputField.style = "margin-top: 6px; height: 26px; width: 26px;";
+        inputField.id = "valueRow" + rowId + "Toggle";
+
+        panelRow.appendChild(inputField);
+      }
+      else if (value == "3") {
+        let panelRow = document.getElementById("panelRow" + rowId + "a");
+        panelRow.innerHTML = "";
+
+        let divRow = document.createElement("div");
+        divRow.classList.add("row");
+
+        let divElement0 = document.createElement("div");
+        divElement0.classList.add("col-12");
+        divElement0.classList.add("col-md-4");
+        let button = document.createElement("button");
+        button.classList.add("btn");
+        button.classList.add("btn-outline-success");
+        button.classList.add("mt-1");
+        button.classList.add("btn-sm");
+        button.innerHTML = "+ Key Pair Value";
+        button.style = "width: 128px !important;";
+        button.setAttribute("onClick", "addKeyPairValue('" + rowId + "')");
+        divElement0.appendChild(button);
+
+        let divElement1 = document.createElement("div");
+        divElement1.classList.add("col-12");
+        divElement1.classList.add("col-md-2");
+        let inputField = document.createElement("input");
+        inputField.classList.add("input-height");
+        inputField.classList.add("form-control");
+        inputField.style = "text-align:center; width: 78px !important;";
+        inputField.type = "number";
+        inputField.placeholder = "Value as number";
+        inputField.id = "valueRow" + rowId + "Field";
+        inputField.value = 0;
+        inputField.disabled = true;
+        divElement1.appendChild(inputField);
+
+        divRow.appendChild(divElement0);
+        divRow.appendChild(divElement1);
+        panelRow.appendChild(divRow);
+
+        panelRow = document.getElementById("panelRow" + rowId + "b");
+        panelRow.innerHTML = "";
+
+        let div1b = document.createElement("div");
+        div1b.classList.add("mb-1");
+        div1b.style = "display: flex;";
+
+        let div1c = document.createElement("div");
+        div1c.style = "padding-left: 40px; flex: 1;";
+        div1c.id = "valueRow" + rowId + "GNData";
+        div1b.appendChild(div1c);
+
+        panelRow.appendChild(div1b);
+      }
+      else if (value == "4") {
+        let panelRow = document.getElementById("panelRow" + rowId + "a");
+        panelRow.innerHTML = "";
+
+        let divRow = document.createElement("div");
+        divRow.classList.add("row");
+
+        let divElement0 = document.createElement("div");
+        divElement0.classList.add("col-12");
+        divElement0.classList.add("col-md-4");
+        let button = document.createElement("button");
+        button.classList.add("btn");
+        button.classList.add("btn-outline-success");
+        button.classList.add("mt-1");
+        button.classList.add("btn-sm");
+        button.innerHTML = "+ Value";
+        button.style = "width: 128px !important;";
+        button.setAttribute("onClick", "addValue('" + rowId + "')");
+        divElement0.appendChild(button);
+
+        let divElement1 = document.createElement("div");
+        divElement1.classList.add("col-12");
+        divElement1.classList.add("col-md-2");
+        let inputField = document.createElement("input");
+        inputField.classList.add("input-height");
+        inputField.classList.add("form-control");
+        inputField.style = "text-align:center; width: 78px !important;";
+        inputField.type = "number";
+        inputField.placeholder = "Value as number";
+        inputField.id = "valueRow" + rowId + "Field";
+        inputField.value = 0;
+        inputField.disabled = true;
+        divElement1.appendChild(inputField);
+
+        divRow.appendChild(divElement0);
+        divRow.appendChild(divElement1);
+        panelRow.appendChild(divRow);
+
+        panelRow = document.getElementById("panelRow" + rowId + "b");
+        panelRow.innerHTML = "";
+        panelRow.innerHTML = "";
+
+        let div1b = document.createElement("div");
+        div1b.classList.add("mb-1");
+        div1b.style = "display: flex;";
+
+        let div1c = document.createElement("div");
+        div1c.style = "padding-left: 40px; flex: 1;";
+        div1c.id = "valueRow" + rowId + "GNData";
+        div1b.appendChild(div1c);
+
+        panelRow.appendChild(div1b);
+      }
+    }
+
+    function addKeyPairValue(rowId) {
+      let inputField = document.getElementById("valueRow" + rowId + "Field");
+      let endRowId = rowId + "." + Number.parseInt(inputField.value);
+
+      let valueRow = document.getElementById("valueRow" + rowId + "GNData");
+
+      let elementDivRow = document.createElement("div");
+      elementDivRow.classList.add("mt-1");
+      elementDivRow.id = "row" + endRowId;
+
+      let divRow = document.createElement("div");
+      divRow.classList.add("row");
+
+      let divElement0 = document.createElement("div");
+      divElement0.classList.add("col-12");
+      divElement0.classList.add("col-md-3");
+      let parameterCodeField0 = document.createElement("input");
+      parameterCodeField0.classList.add("input-height");
+      parameterCodeField0.classList.add("form-control");
+      parameterCodeField0.style = "height: 40px;";
+      parameterCodeField0.type = "text";
+      parameterCodeField0.placeholder = "ParameterCode";
+      parameterCodeField0.id = "parameterCodeRow" + endRowId + "Field";
+      divElement0.appendChild(parameterCodeField0);
+
+      let divElement1 = document.createElement("div");
+      divElement1.classList.add("col-12");
+      divElement1.classList.add("col-md-2");
+      let divSelect1 = document.createElement("select");
+      divSelect1.classList.add("select-container");
+      divSelect1.classList.add("form-select");
+      divSelect1.id = "typeRow" + endRowId + "Dropdown";
+      divSelect1.setAttribute("onchange", "onTypeDropdownChange('" + endRowId + "')");
+
+      let option0 = document.createElement("option");
+      option0.value = "0";
+      option0.selected = true;
+      option0.innerText = "String";
+      divSelect1.appendChild(option0);
+
+      let option1 = document.createElement("option");
+      option1.value = "1";
+      option1.innerText = "Number";
+      divSelect1.appendChild(option1);
+
+      let option2 = document.createElement("option");
+      option2.value = "2";
+      option2.innerText = "Boolean";
+      divSelect1.appendChild(option2);
+
+      let option3 = document.createElement("option");
+      option3.value = "3";
+      option3.innerText = "GNHashtable";
+      divSelect1.appendChild(option3);
+
+      let option4 = document.createElement("option");
+      option4.value = "4";
+      option4.innerText = "GNArray";
+      divSelect1.appendChild(option4);
+
+      divElement1.appendChild(divSelect1);
+
+      let divElement2 = document.createElement("div");
+      divElement2.classList.add("col-12");
+      divElement2.classList.add("col-md-6");
+      let divPanelRowA = document.createElement("div");
+      divPanelRowA.id = "panelRow" + endRowId + "a";
+
+      let inputFieldA = document.createElement("input");
+      inputFieldA.classList.add("input-height");
+      inputFieldA.classList.add("form-control");
+      inputFieldA.type = "text";
+      inputFieldA.placeholder = "Value as string";
+      inputFieldA.id = "valueRow" + endRowId + "Field";
+      divPanelRowA.appendChild(inputFieldA);
+      divElement2.appendChild(divPanelRowA);
+
+      let divElement3 = document.createElement("div");
+      divElement3.classList.add("col-12");
+      divElement3.classList.add("col-md-1");
+      let removeElementButton = document.createElement("button");
+      removeElementButton.style = "margin-top: 3px; width: 50px;";
+      removeElementButton.classList.add("btn");
+      removeElementButton.classList.add("btn-outline-secondary");
+      removeElementButton.classList.add("btn-sm");
+      removeElementButton.setAttribute("onclick", "removeGNDataElement('" + endRowId + "')");
+      removeElementButton.innerText = "-";
+      removeElementButton.id = "removeRow" + endRowId + "Button";
+      divElement3.appendChild(removeElementButton);
+
+      let divElement4 = document.createElement("div");
+      divElement4.id = "panelRow" + endRowId + "b";
+
+      divRow.appendChild(divElement0);
+      divRow.appendChild(divElement1);
+      divRow.appendChild(divElement2);
+      divRow.appendChild(divElement3);
+      divRow.appendChild(divElement4);
+
+      elementDivRow.appendChild(divRow);
+      valueRow.appendChild(elementDivRow);
+
+      inputField.value = Number.parseInt(inputField.value) + 1;
+    }
+
+    function addValue(rowId) {
+      let inputField = document.getElementById("valueRow" + rowId + "Field");
+      let elementId = Number.parseInt(inputField.value);
+      let endRowId = rowId + "." + elementId;
+
+      let valueRow = document.getElementById("valueRow" + rowId + "GNData");
+      let elementDivRow = document.createElement("div");
+      elementDivRow.classList.add("mt-1");
+      elementDivRow.id = "row" + endRowId;
+
+      let divRow = document.createElement("div");
+      divRow.classList.add("row");
+
+      let divElement0 = document.createElement("div");
+      divElement0.classList.add("col-12");
+      divElement0.classList.add("col-md-3");
+
+      let elementIndexSpan0 = document.createElement("span");
+      elementIndexSpan0.style = "line-height: 40px;";
+      elementIndexSpan0.innerText = Number.parseInt(inputField.value) + ".";
+      elementIndexSpan0.id = "elementIdRow" + endRowId;
+      divElement0.appendChild(elementIndexSpan0);
+
+      let divElement1 = document.createElement("div");
+      divElement1.classList.add("col-12");
+      divElement1.classList.add("col-md-2");
+      let divSelect1 = document.createElement("select");
+      divSelect1.classList.add("select-container");
+      divSelect1.classList.add("form-select");
+      divSelect1.id = "typeRow" + endRowId + "Dropdown";
+      divSelect1.setAttribute("onchange", "onTypeDropdownChange('" + endRowId + "')");
+
+      let option0 = document.createElement("option");
+      option0.value = "0";
+      option0.selected = true;
+      option0.innerText = "String";
+      divSelect1.appendChild(option0);
+
+      let option1 = document.createElement("option");
+      option1.value = "1";
+      option1.innerText = "Number";
+      divSelect1.appendChild(option1);
+
+      let option2 = document.createElement("option");
+      option2.value = "2";
+      option2.innerText = "Boolean";
+      divSelect1.appendChild(option2);
+
+      let option3 = document.createElement("option");
+      option3.value = "3";
+      option3.innerText = "GNHashtable";
+      divSelect1.appendChild(option3);
+
+      let option4 = document.createElement("option");
+      option4.value = "4";
+      option4.innerText = "GNArray";
+      divSelect1.appendChild(option4);
+
+      divElement1.appendChild(divSelect1);
+
+      let divElement2 = document.createElement("div");
+      divElement2.classList.add("col-12");
+      divElement2.classList.add("col-md-6");
+      let divPanelRowA = document.createElement("div");
+      divPanelRowA.id = "panelRow" + endRowId + "a";
+
+      let inputFieldA = document.createElement("input");
+      inputFieldA.classList.add("input-height");
+      inputFieldA.classList.add("form-control");
+      inputFieldA.type = "text";
+      inputFieldA.placeholder = "Value as string";
+      inputFieldA.id = "valueRow" + endRowId + "Field";
+      divPanelRowA.appendChild(inputFieldA);
+      divElement2.appendChild(divPanelRowA);
+
+      let divElement3 = document.createElement("div");
+      divElement3.classList.add("col-12");
+      divElement3.classList.add("col-md-1");
+      let removeElementButton = document.createElement("button");
+      removeElementButton.style = "margin-top: 3px; width: 50px;";
+      removeElementButton.classList.add("btn");
+      removeElementButton.classList.add("btn-outline-secondary");
+      removeElementButton.classList.add("btn-sm");
+      removeElementButton.setAttribute("onclick", "removeGNDataElement('" + endRowId + "')");
+      removeElementButton.innerText = "-";
+      removeElementButton.id = "removeRow" + endRowId + "Button";
+      divElement3.appendChild(removeElementButton);
+
+      let divElement4 = document.createElement("div");
+      divElement4.id = "panelRow" + endRowId + "b";
+
+      divRow.appendChild(divElement0);
+      divRow.appendChild(divElement1);
+      divRow.appendChild(divElement2);
+      divRow.appendChild(divElement3);
+      divRow.appendChild(divElement4);
+
+      elementDivRow.appendChild(divRow);
+      valueRow.appendChild(elementDivRow);
+
+      inputField.value = Number.parseInt(inputField.value) + 1;
+    }
+
+    function removeGNDataElement(rowId) {
+      let parentRowId = "";
+      let rowIdSpl = rowId.split(".");
+      let lastRowId = 0;
+      for (let i = 0; i < rowIdSpl.length; i++) {
+        if (i < rowIdSpl.length - 2) {
+          parentRowId += rowIdSpl[i] + ".";
+        }
+        else if (i < rowIdSpl.length - 1) {
+          parentRowId += rowIdSpl[i];
+        }
+        else if (i = rowIdSpl.length - 1) {
+          lastRowId = Number.parseInt(rowIdSpl[i]);
+        }
+      }
+
+      let inputField = document.getElementById("valueRow" + parentRowId + "Field");
+      inputField.value = Number.parseInt(inputField.value) - 1;
+
+      let elementDivRow = document.getElementById("row" + rowId);
+      elementDivRow.remove();
+
+      while (true) {
+        let endRowId = parentRowId + "." + (lastRowId + 1);
+
+        elementDivRow = document.getElementById("row" + endRowId);
+        if (elementDivRow == null) break;
+
+        let finalEndRowId = parentRowId + "." + lastRowId;
+
+        replaceRowId(lastRowId, endRowId, finalEndRowId);
+
+        lastRowId += 1;
+      }
+    }
+
+    function replaceRowId(lastRowId, endRowId, finalEndRowId) {
+      let elementDivRow = document.getElementById("row" + endRowId);
+      elementDivRow.id = "row" + finalEndRowId;
+
+      let parameterCodeField0 = document.getElementById("parameterCodeRow" + endRowId + "Field");
+      if (parameterCodeField0 != null) {
+        parameterCodeField0.id = "parameterCodeRow" + finalEndRowId + "Field";
+      }
+
+      let elementIndexSpan0 = document.getElementById("elementIdRow" + endRowId);
+      if (elementIndexSpan0 != null) {
+        elementIndexSpan0.innerText = lastRowId + ".";
+        elementIndexSpan0.id = "elementIdRow" + finalEndRowId;
+      }
+
+      let divSelect1 = document.getElementById("typeRow" + endRowId + "Dropdown");
+      divSelect1.id = "typeRow" + finalEndRowId + "Dropdown";
+      divSelect1.setAttribute("onchange", "onTypeDropdownChange('" + finalEndRowId + "')");
+
+      let removeElementButton = document.getElementById("removeRow" + endRowId + "Button");
+      removeElementButton.id = "removeRow" + finalEndRowId + "Button";
+      removeElementButton.setAttribute("onclick", "removeGNDataElement('" + finalEndRowId + "')");
+
+      let inputFieldA = document.getElementById("valueRow" + endRowId + "Field");
+      if (inputFieldA != null) {
+        inputFieldA.id = "valueRow" + finalEndRowId + "Field";
+      }
+
+      let divPanelRowA = document.getElementById("panelRow" + endRowId + "a");
+      divPanelRowA.id = "panelRow" + finalEndRowId + "a";
+
+      let divPanelRowB = document.getElementById("panelRow" + endRowId + "b");
+      divPanelRowB.id = "panelRow" + finalEndRowId + "b";
+
+      if (divSelect1.value == "3" || divSelect1.value == "4") {
+        let finalLastRowId = 0;
+
+        while (true) {
+          let endRowId2 = endRowId + "." + finalLastRowId;
+          elementDivRow = document.getElementById("row" + endRowId2);
+          if (elementDivRow == null) break;
+
+          let finalEndRowId2 = finalEndRowId + "." + finalLastRowId;
+          replaceRowId(finalLastRowId, endRowId2, finalEndRowId2);
+
+          finalLastRowId += 1;
+        }
+      }
+    }
+
+    function initGNServer() {
+      let gnServerSettings = new GN.GNServerSettings();
+
+      gnServerSettings.serverAddress = "127.0.0.1";
+      gnServerSettings.serverPort = 2202;
+      gnServerSettings.useSsl = false;
+      gnServerSettings.useSocket = true;
+      gnServerSettings.useHttp = true;
+      gnServerSettings.sendRate = 20;
+      gnServerSettings.reconnectDelay = 5000;
+      gnServerSettings.pingInterval = 20000;
+      gnServerSettings.pingTimeout = 20000;
+      gnServerSettings.codeCanSendNotAuthorized = [GN.OperationCode.Debug, GN.OperationCode.GetAppConfig, GN.OperationCode.Login, GN.OperationCode.RegisterAccount];
+      gnServerSettings.logType = GN.LogType.All;
+
+      GN.GNNetwork.init(gnServerSettings);
+
+      let authTokenField = document.getElementById("authTokenField");
+      authTokenField.value = GN.GNNetwork.getAuthToken();
+
+      GN.GNNetwork.subscriberOnConnectHandler(() => {
+        checkGNSocketStatus();
+      });
+
+      GN.GNNetwork.subscriberOnDisconnectHandler(() => {
+        checkGNSocketStatus();
+      });
+
+      checkGNSocketStatus();
+    }
+
+    function checkGNSocketStatus() {
+      let panelSocketDisconnected = document.getElementById("panelSocketDisconnected");
+      let panelSocketConnected = document.getElementById("panelSocketConnected");
+
+      if (GN.GNNetwork.isSocketConnected()) {
+        panelSocketDisconnected.style = "display: none;";
+        panelSocketConnected.style = "";
+
+        let socketIdField = document.getElementById("socketIdField");
+        socketIdField.value = "SocketId: " + GN.GNNetwork.getSocketSId();
+      }
+      else {
+        panelSocketDisconnected.style = "";
+        panelSocketConnected.style = "display: none;";
+      }
+    }
+
+  </script>
+</body>
+
+</html>
